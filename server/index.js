@@ -4,7 +4,7 @@ const yadisk = require('./yadisk');
 
 const app = express();
 const port = 3000;
-const oauthToken = fs.readFileSync('server/key').toString();
+const oauthToken = fs.readFileSync('server/key', 'utf8').toString().replace('\n', '').replace('\r', '');
 
 console.log(`running, api key: ${oauthToken}`);
 
@@ -15,9 +15,9 @@ app.get('/', (req, res) => res.send({
 app.get('/disk-tree', (req, res) => {
   let response = [];
 
-  const getDirectoryTree = (path, node) => {
+  const getDirectoryTree = (token, path, node) => {
     return new Promise((accept, reject) => {
-      yadisk.getResources(oauthToken, path).then(d => {
+      yadisk.getResources(token, path).then(d => {
         let promises = [];
         if (d._embedded && d._embedded.items) {
           d._embedded.items.forEach(item => {
@@ -32,7 +32,7 @@ app.get('/disk-tree', (req, res) => {
               };
 
               let subPath = path.slice(-1) === `/` ? `${path}${subtree.text}` : `${path}/${subtree.text}`;
-              promises.push(getDirectoryTree(subPath, subtree.nodes));
+              promises.push(getDirectoryTree(token, subPath, subtree.nodes));
 
               node.push(subtree);
             }
@@ -53,10 +53,11 @@ app.get('/disk-tree', (req, res) => {
     });
   };
 
-  getDirectoryTree('/', response).then(() => {
+  getDirectoryTree(oauthToken, '/', response).then(() => {
     res.send(response);
   }).catch(() => {
     console.log(`error`);
+    res.send([]);
   });
 });
 

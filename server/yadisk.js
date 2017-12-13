@@ -27,7 +27,7 @@ const makeGetParameters = options => {
  * @return {Promise<any>}
  */
 const makeRequest = (token, options, method = 'GET') => {
-  let {path = `/`, parameters, postParameters} = options;
+  let {path = `/`, parameters, postContent} = options;
   let parametersString = makeGetParameters(parameters);
 
   if (path.length > 0 && path.charAt(0) !== `/`) {
@@ -35,14 +35,17 @@ const makeRequest = (token, options, method = 'GET') => {
   }
 
   return new Promise((accept, reject) => {
+    let oauth = `OAuth ${token}`;
+
+    let headers = {
+      'authorization': oauth
+    };
     const options = {
       hostname: `cloud-api.yandex.net`,
       port: 443,
       path: `/v1/disk${path}${parametersString}`,
       method,
-      headers: {
-        'authorization': `OAuth ${token}`
-      }
+      headers: headers
     };
 
     let respData = '';
