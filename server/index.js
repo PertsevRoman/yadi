@@ -1,7 +1,12 @@
+const fs = require('fs');
 const express = require('express');
 const yadisk = require('./yadisk');
+
 const app = express();
 const port = 3000;
+const oauthToken = fs.readFileSync('server/key').toString();
+
+console.log(`running, api key: ${oauthToken}`);
 
 app.get('/', (req, res) => res.send({
   target: 1
