@@ -9,44 +9,52 @@ app.get('/', (req, res) => res.send({
   target: 1
 }));
 
-app.get('/disk-tree', (req, res) => res.send({
-  data: [
-    {
-      text: "Parent 1",
-      nodes: [
-        {
-          text: "Child 1",
-          nodes: [
-            {
-              text: "Grandchild 1"
-            },
-            {
-              text: "Grandchild 2"
+app.get('/disk-tree', (req, res) => {
+  let response = [];
+
+  const getDirectoryTree = (path, node) => {
+    return new Promise((accept, reject) => {
+      yadisk.getResources(oauthToken, path).then(d => {
+        let promises = [];
+        if (d._embedded && d._embedded.items) {
+          d._embedded.items.forEach(item => {
+            if (item.type === 'file') {
+              node.push({
+                text: item.name
+              });
+            } else if (item.type === 'dir') {
+              let subtree = {
+                text: item.name,
+                nodes: []
+              };
+
+              let subPath = path.slice(-1) === `/` ? `${path}${subtree.text}` : `${path}/${subtree.text}`;
+              promises.push(getDirectoryTree(subPath, subtree.nodes));
+
+              node.push(subtree);
             }
-          ]
-        },
-        {
-          text: "Child 2"
+          });
+        } else {
+          accept();
         }
-      ]
-    },
-    {
-      text: "Parent 2"
-    },
-    {
-      text: "Parent 3"
-    },
-    {
-      text: "Parent 4"
-    },
-    {
-      text: "Parent 5"
-    }
-  ]
-}));
+
+        Promise.all(promises).then(() => {
+          accept();
+        }).catch(() => {
+          reject();
+        });
+      }).catch(e => {
+        reject();
+        console.error(e);
+      });
+    });
+  };
+
+  getDirectoryTree('/', response).then(() => {
+    res.send(response);
+  }).catch(() => {
+    console.log(`error`);
+  });
+});
 
 app.listen(port);
-
-yadisk.getResources(oauthToken, '/документация').then(d => {
-  console.log(d._embedded.items.forEach(item => console.log(`${item.type} - ${item.name}`)));
-}).catch(e => console.error(e));
