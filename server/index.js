@@ -3,8 +3,6 @@ const yadisk = require('./yadisk');
 const app = express();
 const port = 3000;
 
-const oauthToken = 'AQAAAAAU3TADAAS1JoDa-lrvOk30sMNEJXsU1vo';
-
 app.get('/', (req, res) => res.send({
   target: 1
 }));
