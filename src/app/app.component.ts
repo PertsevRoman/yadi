@@ -3,7 +3,9 @@ import {HttpClient} from "@angular/common/http";
 
 interface Node {
   text: string;
-  nodes?: Node[]
+  preview?: string;
+  path?: string;
+  nodes?: Node[];
 }
 
 @Component({
@@ -26,6 +28,29 @@ export class AppComponent implements OnInit {
       this.fsTree.treeview({
         data: nodeList
       });
+
+      this.fsTree.treeview('collapseAll', {
+        silent: true
+      });
+
+      this.fsTree.on('nodeSelected', (event, node) => {
+        if (node.preview) {
+          console.log(node.preview);
+        }
+      });
+    });
+  }
+
+  getYoutubeUrl() {
+    this.httpClient.get('/api/youtube-url').subscribe((urlData: any) => {
+      let url = urlData.url;
+      window.open(url, `Yandex Auth`, `height=800,width=600`);
+    });
+  }
+
+  getYoutubeVideos() {
+    this.httpClient.get('/api/videos').subscribe((channels: any) => {
+      console.log(channels);
     });
   }
 }

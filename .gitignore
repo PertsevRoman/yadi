@@ -42,4 +42,5 @@ testem.log
 Thumbs.db
 
 *.iml
-server/key
+server/yandex.key
+server/youtube.json

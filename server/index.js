@@ -1,16 +1,31 @@
 const fs = require('fs');
 const express = require('express');
+
 const yadisk = require('./yadisk');
+const youtube = require('./youtube');
 
 const app = express();
 const port = 3000;
-const oauthToken = fs.readFileSync('server/key', 'utf8').toString().replace('\n', '').replace('\r', '');
-
-console.log(`running, api key: ${oauthToken}`);
+const oauthToken = fs.readFileSync('server/yandex.key', 'utf8').toString().replace('\n', '').replace('\r', '');
 
 app.get('/', (req, res) => res.send({
   target: 1
 }));
+
+app.get('/youtube-url', (req, res) => {
+  res.send({
+    url: youtube.generateUrl()
+  });
+});
+
+app.get('/videos', (req, res) => {
+  youtube.getVideos().then(channels => {
+    res.send(channels);
+  }).catch(err => {
+    console.log(`Error`, err);
+    res.send([]);
+  });
+});
 
 app.get('/disk-tree', (req, res) => {
   let response = [];
@@ -22,12 +37,18 @@ app.get('/disk-tree', (req, res) => {
         if (d._embedded && d._embedded.items) {
           d._embedded.items.forEach(item => {
             if (item.type === 'file') {
-              node.push({
-                text: item.name
-              });
+              let fileItem = {
+                text: item.name,
+                path
+              };
+
+              if (item.preview) fileItem.preview = item.preview;
+
+              node.push(fileItem);
             } else if (item.type === 'dir') {
               let subtree = {
                 text: item.name,
+                path,
                 nodes: []
               };
 
