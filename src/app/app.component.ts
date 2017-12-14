@@ -1,11 +1,14 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 
+type FileType = 'file' | 'dir';
+
 interface Node {
   text: string;
   preview?: string;
   path?: string;
   nodes?: Node[];
+  type: FileType;
 }
 
 @Component({
@@ -15,12 +18,17 @@ interface Node {
 })
 export class AppComponent implements OnInit {
   @ViewChild('cnt') cnt: ElementRef;
+  @ViewChild('laster') laster: ElementRef;
+
   private fsTree: any;
+  private modal: JQuery;
+  public currentNode: Node;
 
   constructor(private httpClient: HttpClient) { }
 
   ngOnInit(): void {
     this.fsTree = $(this.cnt.nativeElement).treeview(true);
+    this.modal = $(this.laster.nativeElement);
   }
 
   getData() {
@@ -33,9 +41,10 @@ export class AppComponent implements OnInit {
         silent: true
       });
 
-      this.fsTree.on('nodeSelected', (event, node) => {
-        if (node.preview) {
-          console.log(node.preview);
+      this.fsTree.on('nodeSelected', (event, node: Node) => {
+        if (node.type == "file") {
+          this.currentNode = node;
+          this.modal.modal();
         }
       });
     });
@@ -52,5 +61,12 @@ export class AppComponent implements OnInit {
     this.httpClient.get('/api/videos').subscribe((channels: any) => {
       console.log(channels);
     });
+  }
+
+  loadData(currentNode: Node) {
+    this.httpClient.post(`/api/get-file`, {
+      fileName: currentNode.text,
+      fileDir: currentNode.path
+    }).subscribe(urlInfo => console.log(urlInfo));
   }
 }

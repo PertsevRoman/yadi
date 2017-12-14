@@ -8,6 +8,8 @@ const app = express();
 const port = 3000;
 const oauthToken = fs.readFileSync('server/yandex.key', 'utf8').toString().replace('\n', '').replace('\r', '');
 
+app.use(express.json());
+
 app.get('/', (req, res) => res.send({
   target: 1
 }));
@@ -18,11 +20,31 @@ app.get('/youtube-url', (req, res) => {
   });
 });
 
+app.post('/get-file', (req, res) => {
+  const fileName = req.body.fileName;
+  const fileDir = req.body.fileDir;
+
+  let resource = fileDir.charAt(-1) === `/` || fileDir === `/` ? `${fileDir}${fileName}` : `${fileDir}/${fileName}`;
+  yadisk.downloadUrl(oauthToken, resource).then(url => {
+    yadisk.downloadFile(oauthToken, url.href, fileName).then(() => {
+      res.send({
+        status: 'ok'
+      });
+    }).catch(err => {
+      console.log(err);
+      res.send(err);
+    });
+  }).catch(err => {
+    console.log(err);
+    res.send(err);
+  });
+});
+
 app.get('/videos', (req, res) => {
   youtube.getVideos().then(channels => {
     res.send(channels);
   }).catch(err => {
-    console.log(`Error`, err);
+    console.log(`error`, err);
     res.send([]);
   });
 });
@@ -30,51 +52,7 @@ app.get('/videos', (req, res) => {
 app.get('/disk-tree', (req, res) => {
   let response = [];
 
-  const getDirectoryTree = (token, path, node) => {
-    return new Promise((accept, reject) => {
-      yadisk.getResources(token, path).then(d => {
-        let promises = [];
-        if (d._embedded && d._embedded.items) {
-          d._embedded.items.forEach(item => {
-            if (item.type === 'file') {
-              let fileItem = {
-                text: item.name,
-                path
-              };
-
-              if (item.preview) fileItem.preview = item.preview;
-
-              node.push(fileItem);
-            } else if (item.type === 'dir') {
-              let subtree = {
-                text: item.name,
-                path,
-                nodes: []
-              };
-
-              let subPath = path.slice(-1) === `/` ? `${path}${subtree.text}` : `${path}/${subtree.text}`;
-              promises.push(getDirectoryTree(token, subPath, subtree.nodes));
-
-              node.push(subtree);
-            }
-          });
-        } else {
-          accept();
-        }
-
-        Promise.all(promises).then(() => {
-          accept();
-        }).catch(() => {
-          reject();
-        });
-      }).catch(e => {
-        reject();
-        console.error(e);
-      });
-    });
-  };
-
-  getDirectoryTree(oauthToken, '/', response).then(() => {
+  yadisk.getDirectoryTree(oauthToken, '/', response).then(() => {
     res.send(response);
   }).catch(() => {
     console.log(`error`);
