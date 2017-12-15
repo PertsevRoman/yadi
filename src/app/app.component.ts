@@ -69,4 +69,9 @@ export class AppComponent implements OnInit {
       fileDir: currentNode.path
     }).subscribe(urlInfo => console.log(urlInfo));
   }
+
+  uploadVideo() {
+    this.httpClient.post(`/api/upload-video`, {})
+      .subscribe(uploadInfo => console.log(uploadInfo));
+  }
 }

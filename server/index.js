@@ -40,12 +40,27 @@ app.post('/get-file', (req, res) => {
   });
 });
 
+app.post('/upload-video', (req, res) => {
+  youtube.uploadVideo('D:/temp', 'tund.mp4').then(uploaded => {
+    console.log(uploaded);
+    res.send(uploaded);
+  }).catch(err => {
+    console.log(`error`, err);
+
+    if (inval) {
+      clearInterval(inval);
+    }
+
+    res.send(err);
+  });
+});
+
 app.get('/videos', (req, res) => {
   youtube.getVideos().then(channels => {
     res.send(channels);
   }).catch(err => {
-    console.log(`error`, err);
-    res.send([]);
+    console.log(err);
+    res.send(err);
   });
 });
 

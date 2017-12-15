@@ -29,6 +29,58 @@ const generateUrl = () => {
 
 /**
  *
+ * @param fileDir
+ * @param fileName
+ * @return {Promise<any>}
+ */
+const uploadVideo = (fileDir, fileName) => {
+  const resource = fileDir.charAt(-1) === `/` || fileDir === `/` ? `${fileDir}${fileName}` : `${fileDir}/${fileName}`;
+  const fileSize = (fs.statSync(resource).size / 1024 / 1024).toFixed(2);
+
+  return new Promise((accept, reject) => {
+    console.log(`upload start ${resource}`);
+    let inval = null;
+
+    let req = youtube.videos.insert({
+      auth: oauth2,
+      part: `snippet,status`,
+      resource: {
+        snippet: {
+          title: fileName.replace(/\.[a-zA-Z]*/g, ''),
+          description: ``
+        },
+        status: {
+          privacyStatus: `public`
+        }
+      },
+      notifySubscribers: false,
+      media: {
+        body: fs.createReadStream(resource)
+      }
+    }, (err, response) => {
+      if (err) {
+        reject(err);
+      }
+
+      const uploadedVideos = response.items;
+      accept(uploadedVideos);
+    });
+
+    inval = setInterval(() => {
+      let uploaded = (req.req.connection._bytesDispatched / 1024 / 1024).toFixed(2);
+
+      if (inval && uploaded + 0.01 > fileSize) {
+        console.log(`file uploaded, wait for response`);
+        clearInterval(inval);
+      }
+
+      console.log(`${uploaded}MB of ${fileSize}MB uploaded`);
+    }, 1000);
+  });
+};
+
+/**
+ *
  * @return {Promise<any>}
  */
 const getVideos = () => {
@@ -62,4 +114,4 @@ const getVideos = () => {
   });
 };
 
-module.exports = {generateUrl, getVideos};
+module.exports = {generateUrl, getVideos, uploadVideo};
