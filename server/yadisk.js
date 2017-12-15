@@ -5,6 +5,7 @@
  * @module yadisk
  */
 const https = require('https');
+const request = require('request');
 const fs = require('fs');
 
 /**
@@ -164,37 +165,25 @@ const getDirectoryTree = (token, path, node) => {
 const downloadFile = (token, url, name, path = 'D:/temp') => {
   return new Promise((accept, reject) => {
     const file = fs.createWriteStream(`${path}/${name}`);
-    let urlpath = url.replace('https://downloader.disk.yandex.ru', '');
     let oauth = `OAuth ${token}`;
 
     let headers = {
       'authorization': oauth
     };
-    const options = {
-      hostname: `downloader.disk.yandex.ru`,
-      port: 443,
-      path: urlpath,
-      method: 'GET',
-      headers: headers
-    };
 
-    const req = https.request(options, res => {
-      res.on('data', d => {
-        if (d != null) {
-          file.write(d);
-        }
-      });
+    request({
+      uri: url,
+      headers
+    }, (err) => {
+      if (err) {
+        reject(err);
+      }
 
-      res.on('end', () => {
-        accept();
-      });
+      file.end();
+      accept();
+    }).on('data', (chunk) => {
+      file.write(chunk);
     });
-
-    req.on('error', error => {
-      reject(error);
-    });
-
-    req.end();
   });
 };
 
