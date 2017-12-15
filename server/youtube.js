@@ -3,7 +3,7 @@ const google = require('googleapis');
 const googleAuth = require('google-auth-library');
 const youtube = google.youtube('v3');
 
-const config = JSON.parse(fs.readFileSync('./server/youtube.json').toString());
+let config = JSON.parse(fs.readFileSync('./server/youtube.json').toString());
 
 const REDIRECT_URL = `https://new.sdoetru.ru/api/third-party/youtube`;
 const auth = new googleAuth();
@@ -107,8 +107,10 @@ const getVideos = () => {
         part: 'contentDetails,snippet,id',
         maxResults: 50,
         playlistId: uploadsPlaylistId
+
       }, (err, response) => {
         if (err) {
+
           reject(err);
         }
 
@@ -118,5 +120,20 @@ const getVideos = () => {
     });
   });
 };
+
+(() => {
+  oauth2.getRequestMetadata(REDIRECT_URL, (err, headers) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    config.credentials = oauth2.credentials;
+
+    // const file = fs.createWriteStream('./server/youtube.json');
+    // file.write(config);
+    // file.close();
+  });
+})();
 
 module.exports = {generateUrl, getVideos, uploadVideo};
