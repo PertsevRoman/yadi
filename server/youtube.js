@@ -11,9 +11,10 @@ const oauth2 = new auth.OAuth2(config.client.client_id, config.client.client_sec
 oauth2.credentials = config.credentials;
 
 const scopes = [
-  `https://www.googleapis.com/auth/youtube.force-ssl`,
+  `https://www.googleapis.com/auth/youtube`,
   `https://www.googleapis.com/auth/youtube.upload`,
-  `https://www.googleapis.com/auth/youtube.readonly`
+  `https://www.googleapis.com/auth/youtube.readonly`,
+  `https://www.googleapis.com/auth/youtube.force-ssl`
 ];
 
 /**
@@ -47,10 +48,15 @@ const uploadVideo = (fileDir, fileName) => {
       resource: {
         snippet: {
           title: fileName.replace(/\.[a-zA-Z]*/g, ''),
-          description: ``
+          description: `Super description`,
+          tags: [
+            `sepia`, `ffmpeg`
+          ],
+          categoryId: 22
         },
         status: {
-          privacyStatus: `public`
+          privacyStatus: `private`,
+          embeddable: true
         }
       },
       notifySubscribers: false,
@@ -62,19 +68,18 @@ const uploadVideo = (fileDir, fileName) => {
         reject(err);
       }
 
-      const uploadedVideos = response.items;
-      accept(uploadedVideos);
+      accept(response);
     });
 
     inval = setInterval(() => {
       let uploaded = (req.req.connection._bytesDispatched / 1024 / 1024).toFixed(2);
 
+      console.log(`${uploaded}MB of ${fileSize}MB uploaded`);
+
       if (inval && uploaded + 0.01 > fileSize) {
         console.log(`file uploaded, wait for response`);
         clearInterval(inval);
       }
-
-      console.log(`${uploaded}MB of ${fileSize}MB uploaded`);
     }, 1000);
   });
 };

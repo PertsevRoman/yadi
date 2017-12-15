@@ -46,11 +46,6 @@ app.post('/upload-video', (req, res) => {
     res.send(uploaded);
   }).catch(err => {
     console.log(`error`, err);
-
-    if (inval) {
-      clearInterval(inval);
-    }
-
     res.send(err);
   });
 });
