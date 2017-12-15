@@ -1,7 +1,7 @@
 const express = require('express');
 
 const app = express();
-const url = `/api/third-party/youtube`;
+const url = `/third-party/youtube`;
 const port = 3000;
 
 app.get(url, (req, res) => {
