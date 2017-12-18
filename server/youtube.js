@@ -122,7 +122,7 @@ const getVideos = () => {
 };
 
 (() => {
-  oauth2.getRequestMetadata(REDIRECT_URL, (err, headers) => {
+  oauth2.getRequestMetadata(REDIRECT_URL, err => {
     if (err) {
       console.log(err);
       return;
@@ -130,9 +130,11 @@ const getVideos = () => {
 
     config.credentials = oauth2.credentials;
 
-    // const file = fs.createWriteStream('./server/youtube.json');
-    // file.write(config);
-    // file.close();
+    console.log(config.credentials);
+
+    const file = fs.createWriteStream('./server/youtube.json');
+    file.write(new Buffer(JSON.stringify(config)));
+    file.close();
   });
 })();
 
