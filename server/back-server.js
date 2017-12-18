@@ -1,6 +1,6 @@
+const fs = require('fs');
 const express = require('express');
 const google = require('googleapis');
-const fs = require('fs');
 const googleAuth = require('google-auth-library');
 
 const app = express();
@@ -17,13 +17,13 @@ app.get(url, (req, res) => {
   const error = req.query.error;
 
   if (error) {
-    console.log(`Error:`, error);
+    console.log(`error`, error);
     return;
   }
 
   oauth2.getToken(code, (err, token) => {
     if (err) {
-      console.log('Error while trying to retrieve access token', err);
+      console.log('error while trying to retrieve access token', err);
       return;
     }
 

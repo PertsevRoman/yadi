@@ -7,7 +7,10 @@ let config = JSON.parse(fs.readFileSync('./server/youtube.json').toString());
 
 const REDIRECT_URL = `https://new.sdoetru.ru/api/third-party/youtube`;
 const auth = new googleAuth();
-const oauth2 = new auth.OAuth2(config.client.client_id, config.client.client_secret, REDIRECT_URL);
+const oauth2 = new auth.OAuth2(
+  config.client.client_id,
+  config.client.client_secret,
+  REDIRECT_URL);
 oauth2.credentials = config.credentials;
 
 const scopes = [
