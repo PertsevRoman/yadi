@@ -58,7 +58,7 @@ const uploadVideo = (fileDir, fileName) => {
           categoryId: 22
         },
         status: {
-          privacyStatus: `private`,
+          privacyStatus: `unlisted`,
           embeddable: true
         }
       },

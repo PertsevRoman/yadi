@@ -71,11 +71,3 @@ app.get('/disk-tree', (req, res) => {
 });
 
 app.listen(port);
-
-(() => {
-  let fileName = `tund.mp4`;
-  let fileDir = `D:/temp`;
-  youtube.uploadVideo(fileDir, fileName).then(() => {
-    console.log(`file ${fileDir}/${fileName} has been uploaded`);
-  });
-})();
