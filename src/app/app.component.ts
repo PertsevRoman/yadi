@@ -11,6 +11,11 @@ interface Node {
   type: FileType;
 }
 
+interface Video {
+  id: string;
+  thumb: string;
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -19,10 +24,12 @@ interface Node {
 export class AppComponent implements OnInit {
   @ViewChild('cnt') cnt: ElementRef;
   @ViewChild('laster') laster: ElementRef;
+  @ViewChild('videoFrame') videoFrame: ElementRef;
 
   private fsTree: any;
   private modal: JQuery;
   public currentNode: Node;
+  public videos: Video[] = [];
 
   constructor(private httpClient: HttpClient) { }
 
@@ -58,8 +65,13 @@ export class AppComponent implements OnInit {
   }
 
   getYoutubeVideos() {
-    this.httpClient.get('/api/videos').subscribe((channels: any) => {
-      console.log(channels);
+    this.httpClient.get('/api/videos').subscribe((videos: any) => {
+      this.videos = videos.map(video => {
+        return {
+          id: video.contentDetails.videoId,
+          thumb: video.snippet.thumbnails.default.url
+        }
+      });
     });
   }
 
@@ -70,8 +82,7 @@ export class AppComponent implements OnInit {
     }).subscribe(urlInfo => console.log(urlInfo));
   }
 
-  uploadVideo() {
-    this.httpClient.post(`/api/upload-video`, {})
-      .subscribe(uploadInfo => console.log(uploadInfo));
+  showVideo(video: Video) {
+    this.videoFrame.nativeElement.setAttribute('src', `https://youtube.com/embed/${video.id}`);
   }
 }

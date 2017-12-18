@@ -1,18 +1,12 @@
+<button class="btn btn-default" (click)="getYoutubeVideos()">
+  Get Videos
+</button>
 <button class="btn btn-default" (click)="getData()">
   Refresh Disk
 </button>
 <button class="btn btn-default" (click)="getYoutubeUrl()">
   Get Youtube URL
 </button>
-<button class="btn btn-default" (click)="getYoutubeVideos()">
-  Get Videos
-</button>
-<button class="btn btn-default" (click)="uploadVideo()">
-  Upload Video
-</button>
-<div class="list-frame">
-  <div #cnt></div>
-</div>
 <div class="modal fade" #laster role="dialog">
   <div class="modal-dialog modal-sm">
     <div class="modal-content">
@@ -26,6 +20,27 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" (click)="loadData(currentNode)" data-dismiss="modal">Yes</button>
       </div>
+    </div>
+  </div>
+</div>
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#home">Youtube List</a></li>
+  <li><a data-toggle="tab" href="#menu1">Yandex.Disk</a></li>
+</ul>
+
+<div class="tab-content">
+  <div id="home" class="tab-pane fade in active">
+    <img
+      *ngFor="let video of videos"
+      [src]="video.thumb"
+      (click)="showVideo(video)"
+      class="img-thumbnail pointer" />
+
+    <iframe #videoFrame width="480" height="360"></iframe>
+  </div>
+  <div id="menu1" class="tab-pane fade">
+    <div class="list-frame">
+      <div #cnt></div>
     </div>
   </div>
 </div>
